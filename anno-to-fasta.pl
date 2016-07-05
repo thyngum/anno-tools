@@ -1,11 +1,11 @@
 #!/usr/bin/perl
 
-# Extracts the sequence of one or more annotated files and save it to corresponding
+# Extracts the sequence from one or more annotated files and save it to corresponding
 # FASTA files (with *.fasta extension).
 
-# 	anno-to-fasta.pl [-f <format>] <file(s)>
+#   anno-to-fasta.pl [-f <format>] <file(s)>
 
-#   	-f <format>		Any of the formats supported by BioPerl (guessed if not specified).
+#	-f   	Any of the formats supported by BioPerl (guessed if not specified).
 
 use Bio::SeqIO;
 use File::Basename;
@@ -14,54 +14,43 @@ use Getopt::Long;
 
 GetOptions ( 'f=s' => \$format );
 
-if ( @ARGV ) {
+die "Usage: anno-to-fasta.pl [-f <format>] <file(s)>\n" unless ( @ARGV );
 
-	foreach $item ( @ARGV ) {
-		next if ($item =~ m/^\./); # ignoring files beginning with a period
+foreach my $item ( @ARGV ) {
+	next if ($item =~ m/^\./);
+	
+	if ( -f $item ) {		
+		my ($name, $path, $suffix) = fileparse($item, qr/\.[^.]*/);		    
+	    my $output = $path . "/" . $name . ".fasta";
+
+	    if ( $format ) {
+	    	$seqio_in = new Bio::SeqIO(-file => $item,
+			                           -format => $format ) or die "Error opening file \'$item\'!";
+	    }
+	    else {
+	    	$seqio_in = new Bio::SeqIO(-file => $item) or die "Error opening file \'$item\'!";
+	    }
+	    
+	    if ( -e $output ) {
+	    	print "File \'$name.fasta\' already exist! Overwrite it? (y/N) ";
+	    	my $answer = <STDIN>;
+	    	chomp $answer;
+	    	
+	    	next if ( $answer ne 'y' or $answer ne 'Y' );
+	    }
+	    
+	    my $seq_out = new Bio::SeqIO(-format => 'fasta',
+		                             -file   => ">$output");
 		
-		if ( -f $item ) {		
-			($name, $path, $suffix) = fileparse($item, qr/\.[^.]*/);	
-		    
-		    $output = $path . "/" . $name . ".fasta";
-
-		    if ( $format ) {
-		    	$seqio = new Bio::SeqIO(-file => $item,
-		    	                        -format => $format ) or die "Error opening file \'$item\'!";
-		    }
-		    else {
-		    	$seqio = new Bio::SeqIO(-file => $item) or die "Error opening file \'$item\'!";
-		    }
-		    
-		    if ( -e $output ) {
-		    	print "File \'$name.fasta\' already exist! Overwrite it? (y/N) ";
-		    	$answer = <STDIN>;
-		    	chomp $answer;
-		    	
-		    	next if ( $answer ne 'y' and $answer ne 'Y' );
-		    }
-		    
-		    $seqout = new Bio::SeqIO(-format => 'fasta',
-			   						 -file   => ">$output");
-			
-			while ( $seq = $seqio->next_seq ) {
-	
-				# Address the issue that IDs are missing in some EMBL files
-				if ( $seq->id eq "unknown_id" ) {
-					$seq->id($name);
-				}
-				$seqout->write_seq($seq);	
-			}
-			
-			print "$name.fasta .. done\n";
-			
-		} 
-		else {
-			print STDERR "File \'$item\' not found!\n";
-		}          
-	}
-	
+		while ( my $seq = $seqio_in->next_seq() ) {
+			$seq->id($name) if ( $seq->id eq "unknown_id" ); # Address the issue that IDs are missing in some EMBL files
+			$seq_out->write_seq($seq);	
+		}
+		
+		print STDERR "$name.fasta .. done\n";
+		
+	} 
+	else {
+		print STDERR "File \'$item\' not found!\n";
+	}          
 }
-else {
-	die "Usage: anno-to-fasta.pl [-f <format>] <file(s)>\n";
-}
-
