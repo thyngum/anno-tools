@@ -7,6 +7,8 @@
 
 #	-f   	Any of the formats supported by BioPerl (guessed if not specified).
 
+# Script written by Alejandro Llanes (thyngum@gmail.com)
+
 use Bio::SeqIO;
 use File::Basename;
 use File::Spec;
@@ -36,7 +38,7 @@ foreach my $item ( @ARGV ) {
 			my $answer = <STDIN>;
 			chomp $answer;
 			
-			next if ( $answer ne 'y' or $answer ne 'Y' );
+			next if ( $answer ne 'y' and $answer ne 'Y' );
 		}
 
 		my $seq_out = new Bio::SeqIO(-format => 'fasta',
