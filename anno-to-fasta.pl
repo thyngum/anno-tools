@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# Extracts the sequence from one or more annotated files and save it to corresponding
+# Extracts the sequences from one or more annotated files and save them to corresponding
 # FASTA files (with *.fasta extension).
 
 #   anno-to-fasta.pl [-f <format>] <file(s)>
