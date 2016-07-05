@@ -21,25 +21,25 @@ foreach my $item ( @ARGV ) {
 	
 	if ( -f $item ) {		
 		my ($name, $path, $suffix) = fileparse($item, qr/\.[^.]*/);		    
-	    my $output = $path . "/" . $name . ".fasta";
+		my $output = $path . "/" . $name . ".fasta";
 
-	    if ( $format ) {
-	    	$seqio_in = new Bio::SeqIO(-file => $item,
+		if ( $format ) {
+			$seqio_in = new Bio::SeqIO(-file => $item,
 			                           -format => $format ) or die "Error opening file \'$item\'!";
-	    }
-	    else {
-	    	$seqio_in = new Bio::SeqIO(-file => $item) or die "Error opening file \'$item\'!";
-	    }
-	    
-	    if ( -e $output ) {
-	    	print "File \'$name.fasta\' already exist! Overwrite it? (y/N) ";
-	    	my $answer = <STDIN>;
-	    	chomp $answer;
-	    	
-	    	next if ( $answer ne 'y' or $answer ne 'Y' );
-	    }
-	    
-	    my $seq_out = new Bio::SeqIO(-format => 'fasta',
+		}
+		else {
+			$seqio_in = new Bio::SeqIO(-file => $item) or die "Error opening file \'$item\'!";
+		}
+
+		if ( -e $output ) {
+			print "File \'$name.fasta\' already exist! Overwrite it? (y/N) ";
+			my $answer = <STDIN>;
+			chomp $answer;
+			
+			next if ( $answer ne 'y' or $answer ne 'Y' );
+		}
+
+		my $seq_out = new Bio::SeqIO(-format => 'fasta',
 		                             -file   => ">$output");
 		
 		while ( my $seq = $seqio_in->next_seq() ) {
