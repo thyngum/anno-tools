@@ -1,2 +1,2 @@
 # anno-tools
-Simple tools to work with annotated sequence files
+Simple tools to work with annotated sequence files ...
