@@ -46,7 +46,7 @@ foreach my $item ( @ARGV ) {
 			$seq->id($name) if ( $seq->id eq "unknown_id" ); # Address the issue that IDs are missing in some EMBL files
 			$seq_out->write_seq($seq);	
 		}
-		
+
 		print STDERR "$name.fasta .. done\n";
 		
 	} 
