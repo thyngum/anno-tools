@@ -34,11 +34,11 @@ foreach my $item ( @ARGV ) {
 		}
 		
 		if ( -e $output ) {
-		    print "File \'$name.embl\' already exist! Overwrite it? (y/N) ";
-		    $answer = <STDIN>;
-		    chomp $answer;
-		    
-		    next if ( $answer ne 'y' and $answer ne 'Y' );
+			print "File \'$name.embl\' already exist! Overwrite it? (y/N) ";
+			$answer = <STDIN>;
+			chomp $answer;
+			
+			next if ( $answer ne 'y' and $answer ne 'Y' );
 		}
 	    
 		my $seq_out = Bio::SeqIO->new(-file => ">$output",
