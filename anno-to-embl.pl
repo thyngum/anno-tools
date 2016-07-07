@@ -26,11 +26,11 @@ foreach my $item ( @ARGV ) {
 		my $output = $path . "/" . $name . ".embl";
 
 		if ( $format ) {
-		    $seqio = new Bio::SeqIO(-file => $item,
-		                            -format => $format ) or die "Error opening file \'$item\'!";
+			$seqio = new Bio::SeqIO(-file => $item,
+			                        -format => $format ) or die "Error opening file \'$item\'!";
 		}
 		else {
-		    $seqio = new Bio::SeqIO(-file => $item) or die "Error opening file \'$item\'!";
+			$seqio = new Bio::SeqIO(-file => $item) or die "Error opening file \'$item\'!";
 		}
 		
 		if ( -e $output ) {
@@ -42,7 +42,7 @@ foreach my $item ( @ARGV ) {
 		}
 	    
 		my $seq_out = Bio::SeqIO->new(-file => ">$output",
-								   -format => 'embl');
+		                              -format => 'embl');
 						  
 		while ( my $seq = $seqio->next_seq ) {	
 			$seq_out->write_seq($seq);
