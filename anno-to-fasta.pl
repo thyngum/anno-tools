@@ -5,7 +5,7 @@
 
 #   anno-to-fasta.pl [-f <format>] <file(s)>
 
-#	-f   	Any of the formats supported by BioPerl (guessed if not specified).
+#     -f     Input file format (guessed if not specified).
 
 # Script written by Alejandro Llanes (thyngum@gmail.com)
 

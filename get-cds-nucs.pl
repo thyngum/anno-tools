@@ -1,12 +1,14 @@
 #!/usr/bin/perl
 
-# Extracts the amino acid sequence of each CDS from an annotated sequence file. 
-# The sequences are saved in a FASTA file, named after the input file.
+# Extracts the nucleotide sequence of each CDS from all the annotated sequence 
+# files in the given directory. The sequences are saved in FASTA formatted files
+# (with *.fasta extension), named after each corresponding input file and distinguished
+# by the "-CDS" key. Supports files in EMBL (*.embl) and Genbank (*.gbk) format.
 
-#   get-cds.pl [-f <format>] [-p] <file>
+# 	get-cds-nucs.pl [-f <format>] [-p] -dir <directory>
 
-#     -f          Input file format (guessed if not specified).
-#     -pseudo     Include CDS features flagged as pseudogenes.
+#   	-f <format>		File format can be genbank (default) or embl.
+#		-p				Print a tab-separated of each entry to STDOUT.
 
 use Bio::SeqIO;
 use Cwd 'abs_path';
@@ -40,9 +42,9 @@ print "LOCUS_TAG\tDESC\tLENGTH_BP\n" if ( $print );
 
 $count = 0;
 $global_cds_count = 0;
-
-
-
+while ( $item = readdir(DIR) ) {
+    next if ($item =~ m/^\./); # ignoring files beginning with a period
+    $filename = $dir . "/" . $item;
     if ( ! -d $filename ) {       
         ($name,$path,$suffix) = fileparse($filename, qr/\.[^.]*/);
         $suffix = lc($suffix);
@@ -99,5 +101,12 @@ $global_cds_count = 0;
 				}							 
 			}
         }    
-    }
+    }           
+}
+
+print STDERR "\nFound $count $format (*$exp_suffix) files with $global_cds_count CDSs in input directory.\n";
+
+
+
+
 
