@@ -1,103 +1,94 @@
 #!/usr/bin/perl
 
 # Extracts the amino acid sequence of each CDS from an annotated sequence file. 
-# The sequences are saved in a FASTA file, named after the input file.
+# Output the sequences in FASTA format to STDOUT.
 
-#   get-cds.pl [-f <format>] [-p] <file>
+#   get-cds.pl [-f <format>] [-pseudo] <file>
 
 #     -f          Input file format (guessed if not specified).
 #     -pseudo     Include CDS features flagged as pseudogenes.
 
 use Bio::SeqIO;
-use Cwd 'abs_path';
 use File::Basename;
 use File::Spec;
 use Getopt::Long;
 
-GetOptions ( 'dir=s' => \$dir, 'f=s' => \$format, 'p' => \$print );
+GetOptions ( 'f=s' => \$format, 'pseudo' => \$pseudo );
 
-die "Usage: get-cds-nucs.pl [-f <format>] [-p] -dir <directory>\n" if ( !$dir ); 
+die "Usage: get-cds.pl [-f <format>] [-pseudo] <file>\n" unless ( @ARGV ); 
 
-$dir = abs_path($dir);
-die "Invalid input directory\n" if ( ! -d $dir );
+my $item = $ARGV[0];
 
-opendir(DIR, $dir) or die $!;
+die "File \'$item\' not found!\n" unless ( -f $item );
 
-$format = "genbank" if ( !$format );
-if ( $format eq "genbank" ) {
-	$exp_suffix = ".gbk";
+if ( $format ) {
+	$seqio_in = new Bio::SeqIO(-file => $item,
+	                           -format => $format ) or die "Error opening file \'$item\'!";
 }
 else {
-	if ( $format eq "embl" ) {
-		$exp_suffix = ".embl";
-	}
-	else {
-		die "Invalid format, only 'genbank' and 'embl' are accepted.\n";
+	$seqio_in = new Bio::SeqIO(-file => $item) or die "Error opening file \'$item\'!";
+}
+
+my $count_CDS = 0;
+my $count_pseudo = 0;
+
+while ( my $seq = $seqio_in->next_seq() ) {
+	foreach my $feature ( $seq->get_SeqFeatures ) {
+		my $type = $feature->primary_tag;
+		my $start = $feature->start;
+		my $locus_tag = "";
+		my $product = "";		
+
+		if ( $type eq 'CDS') {
+			if ( $feature->has_tag('codon_start') ) {
+				( $codon_start ) = $feature->get_tag_values('codon_start');
+			}
+			else {
+				$codon_start = 1;
+			}
+			unless ( $feature->has_tag('partial') or $codon_start != 1 ) {
+				if ( $feature->has_tag('pseudo') ) {
+					if ( $pseudo ) {
+						$count_CDS++;
+						$count_pseudo++;
+
+						( $locus_tag ) = $feature->get_tag_values('locus_tag');
+						die "CDS feature marked as pseudo starting at $start has no locus_tag!" unless $locus_tag;
+						( $product ) = $feature->get_tag_values('product');
+						$product = "Unknown product" unless $product;
+						$protein = $feature->spliced_seq->translate;
+						print ">$locus_tag $product (pseudo)\n";
+						$aa_seq = $protein->seq;
+						$aa_seq =~ s/\*$//;
+						print $aa_seq;
+						print "\n";					
+					}
+				}
+				else {
+					$count_CDS++;
+
+					( $locus_tag ) = $feature->get_tag_values('locus_tag');
+					die "CDS feature starting at $start has no locus_tag!" unless $locus_tag;
+					( $product ) = $feature->get_tag_values('product');
+					$product = "Unknown product" unless $product;
+					$protein = $feature->spliced_seq->translate;
+					print ">$locus_tag $product\n";
+					$aa_seq = $protein->seq;
+					$aa_seq =~ s/\*$//;
+					print $aa_seq;
+					print "\n";	
+				}
+			}
+			else {
+				print STDERR "Partial CDS feature starting at $start was ignored!";
+			}
+		}			
 	}
 }
 
-print "LOCUS_TAG\tDESC\tLENGTH_BP\n" if ( $print );
-
-$count = 0;
-$global_cds_count = 0;
-
-
-
-    if ( ! -d $filename ) {       
-        ($name,$path,$suffix) = fileparse($filename, qr/\.[^.]*/);
-        $suffix = lc($suffix);
-        if ( $suffix eq $exp_suffix ) {
-        	$count++;
-        	
-            $seqio = new Bio::SeqIO(-format => $format,
-			   						-file   => $filename);
-            
-            $output = $dir . "/" . $name . "-CDS.fasta";
-            
-            $seqout = new Bio::SeqIO(-format => 'fasta',
-			   					     -file   => ">$output");
-
-			print STDERR "Processing file \'$name$suffix\':\n";
-			$feat_count = 0;
-			while ( $seq = $seqio->next_seq ) {			
-				for $feat_object ($seq->get_SeqFeatures) {    
-					if ( uc($feat_object->primary_tag) eq "CDS" ) {
-						
-						$feat_count++;
-						$global_cds_count++;
-						
-						if ($feat_object->has_tag("locus_tag")) {
-							@locus_tag = $feat_object->get_tag_values("locus_tag");
-							print $locus_tag[0] . "\t" if ( $print );
-							$id = $locus_tag[0];
-						}
-						else {
-							print STDERR "No \'locus_tag\' found for feature $feat_count, using 'CDS$feat_count' as tag: ";
-							$id = "CDS$feat_count";
-						}
-						
-						if ($feat_object->has_tag("product")) {
-							@product = $feat_object->get_tag_values("product");
-							$desc = $product[0];
-						}
-						else {
-							$desc = "unknown product";
-						}
-						
-						
-						$cds_seq = $feat_object->seq;
-						$cds_seq->id($id);
-						$cds_seq->desc($desc);
-						
-						# Uncomment to see what should be printed to the output FASTA files
-						# print STDERR "\n>" . $cds_seq->id . "    " . $cds_seq->desc . "\n" .  $cds_seq->seq . "\n";
-						$seqout->write_seq($cds_seq);
-						
-						print "\"" . $cds_seq->desc . "\"\t" . length($cds_seq->seq) . "\n" if ( $print );
-						
-					}	
-				}							 
-			}
-        }    
-    }
-
+if ( $pseudo ) {
+	print STDERR "$item: $count_CDS CDS, $count_pseudo flagged as pseudo\n";
+}
+else {
+	print STDERR "$item: $count_CDS CDS\n";
+}
