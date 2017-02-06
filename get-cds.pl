@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 # Extracts the amino acid sequence of each CDS from an annotated sequence file. 
-# Output the sequences in FASTA format to STDOUT.
+# Outputs sequences in FASTA format to STDOUT.
 
 #   get-cds.pl [-f <format>] [-pseudo] <file>
 
@@ -60,8 +60,7 @@ while ( my $seq = $seqio_in->next_seq() ) {
 						print ">$locus_tag $product (pseudo)\n";
 						$aa_seq = $protein->seq;
 						$aa_seq =~ s/\*$//;
-						print $aa_seq;
-						print "\n";					
+						print sblock($aa_seq);
 					}
 				}
 				else {
@@ -75,8 +74,7 @@ while ( my $seq = $seqio_in->next_seq() ) {
 					print ">$locus_tag $product\n";
 					$aa_seq = $protein->seq;
 					$aa_seq =~ s/\*$//;
-					print $aa_seq;
-					print "\n";	
+					print sblock($aa_seq);
 				}
 			}
 			else {
@@ -91,4 +89,21 @@ if ( $pseudo ) {
 }
 else {
 	print STDERR "$item: $count_CDS CDS\n";
+}
+
+
+sub sblock {
+
+	# Returns a sequence block with n chars per line (n = 60 by default).
+	# 	Usage: sblock(sequence, n)
+
+	my ( $seq, $n ) = @_;
+	$n = 60 unless ( $n );
+
+	$block = "";
+	while ( my $chunk = substr($seq, 0, $n, "") ) {
+		$block .= "$chunk\n";
+	}
+
+	return $block;
 }
