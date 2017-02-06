@@ -25,30 +25,30 @@ foreach my $item ( @ARGV ) {
 		my ($name, $path, $suffix) = fileparse($item, qr/\.[^.]*/);	
 		my $output = $path . "/" . $name . ".embl";
 
-	    if ( $format ) {
-	    	$seqio = new Bio::SeqIO(-file => $item,
-	    	                        -format => $format ) or die "Error opening file \'$item\'!";
-	    }
-	    else {
-	    	$seqio = new Bio::SeqIO(-file => $item) or die "Error opening file \'$item\'!";
-	    }
-
-	    if ( -e $output ) {
-	    	print "File \'$name.embl\' already exist! Overwrite it? (y/N) ";
-	    	$answer = <STDIN>;
-	    	chomp $answer;
-	    	
-	    	next if ( $answer ne 'y' and $answer ne 'Y' );
-	    }
+		if ( $format ) {
+			$seqio = new Bio::SeqIO(-file => $item,
+			                        -format => $format ) or die "Error opening file \'$item\'!";
+		}
+		else {
+			$seqio = new Bio::SeqIO(-file => $item) or die "Error opening file \'$item\'!";
+		}
+		
+		if ( -e $output ) {
+			print "File \'$name.embl\' already exist! Overwrite it? (y/N) ";
+			$answer = <STDIN>;
+			chomp $answer;
+			
+			next if ( $answer ne 'y' and $answer ne 'Y' );
+		}
 	    
 		my $seq_out = Bio::SeqIO->new(-file => ">$output",
-								   -format => 'embl');
+		                              -format => 'embl');
 						  
 		while ( my $seq = $seqio->next_seq ) {	
 			$seq_out->write_seq($seq);
 		}		    
 	    
-	    print STDERR "$name.embl .. done\n"
+		print STDERR "$name.embl .. done\n"
 
 	}
 	else {
