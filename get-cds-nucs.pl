@@ -13,6 +13,9 @@ use File::Basename;
 use File::Spec;
 use Getopt::Long;
 
+# WARNING: The BioPerl method spliced_seq() retrieve an incorrect sequence in 
+# some cases for split features in the reverse strand! 
+
 GetOptions ( 'f=s' => \$format, 'pseudo' => \$pseudo );
 
 die "Usage: get-cds.pl [-f <format>] [-pseudo] <file>\n" unless ( @ARGV ); 
