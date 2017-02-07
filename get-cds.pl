@@ -84,7 +84,8 @@ while ( my $seq = $seqio_in->next_seq() ) {
 					$product = "Unknown product"
 				}
 
-				my $protein = $feature->spliced_seq->translate;
+				my $frame = $codon_start - 1;
+				my $protein = $feature->spliced_seq->translate(-frame => $frame);
 				my $aa_seq = $protein->seq;
 				$aa_seq =~ s/\*$//;
 				print ">$locus_tag $product\n";
