@@ -8,9 +8,6 @@
 #     -f          Input file format (guessed if not specified).
 #     -pseudo     Include CDS features flagged as pseudo.
 
-# WARNING: The BioPerl method spliced_seq() retrieve an incorrect sequence in 
-# some cases for split features in the reverse strand! 
-
 use Bio::SeqIO;
 use File::Basename;
 use File::Spec;
