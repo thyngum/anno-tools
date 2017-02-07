@@ -78,7 +78,7 @@ while ( my $seq = $seqio_in->next_seq() ) {
 					( $product ) = $feature->get_tag_values('product');
 				}
 				else {
-					$product = "Unknown product"
+					$product = "unknown product"
 				}
 
 				my $frame = $codon_start - 1;
