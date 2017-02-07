@@ -6,7 +6,7 @@
 #   get-cds.pl [-f <format>] [-pseudo] <file>
 
 #     -f          Input file format (guessed if not specified).
-#     -pseudo     Include CDS features flagged as pseudogenes.
+#     -pseudo     Include CDS features flagged as pseudo.
 
 # WARNING: The BioPerl method spliced_seq() retrieve an incorrect sequence in 
 # some cases for split features in the reverse strand! 
@@ -39,49 +39,58 @@ while ( my $seq = $seqio_in->next_seq() ) {
 	foreach my $feature ( $seq->get_SeqFeatures ) {
 		my $type = $feature->primary_tag;
 		my $start = $feature->start;
-		my $locus_tag = "";
-		my $product = "";		
 
 		if ( $type eq 'CDS') {
+
+			my $codon_start = 1;
 			if ( $feature->has_tag('codon_start') ) {
 				( $codon_start ) = $feature->get_tag_values('codon_start');
 			}
-			else {
-				$codon_start = 1;
-			}
-			unless ( $feature->has_tag('partial') or $codon_start != 1 ) {
-				if ( $feature->has_tag('pseudo') ) {
-					if ( $pseudo ) {
-						$count_CDS++;
-						$count_pseudo++;
 
-						( $locus_tag ) = $feature->get_tag_values('locus_tag');
-						die "CDS feature marked as pseudo starting at $start has no locus_tag!" unless $locus_tag;
-						( $product ) = $feature->get_tag_values('product');
-						$product = "Unknown product" unless $product;
-						$protein = $feature->spliced_seq->translate;
-						print ">$locus_tag $product (pseudo)\n";
-						$aa_seq = $protein->seq;
-						$aa_seq =~ s/\*$//;
-						print sblock($aa_seq);
+			my $ok = 0;
+			if ( $feature->has_tag('pseudo') ) {
+				if ( $pseudo ) {
+					$ok = 1;
+					$count_pseudo++;
+				}
+			}
+			else {
+				if ( $feature->has_tag('partial') ) {
+					if ( $feature->has_tag($codon_start) ) {	
+						$ok = 1
 					}
+					else {				
+						print STDERR "Ignoring partial feature at $start with no codon_start attribute!";
+					}	
 				}
 				else {
-					$count_CDS++;
-
-					( $locus_tag ) = $feature->get_tag_values('locus_tag');
-					die "CDS feature starting at $start has no locus_tag!" unless $locus_tag;
-					( $product ) = $feature->get_tag_values('product');
-					$product = "Unknown product" unless $product;
-					$protein = $feature->spliced_seq->translate;
-					print ">$locus_tag $product\n";
-					$aa_seq = $protein->seq;
-					$aa_seq =~ s/\*$//;
-					print sblock($aa_seq);
+					$ok = 1;
 				}
 			}
-			else {
-				print STDERR "Partial CDS feature starting at $start was ignored!";
+
+			if ( $ok ) {
+				my $locus_tag;
+				if ( $feature->has_tag('locus_tag') ) {
+					( $locus_tag ) = $feature->get_tag_values('locus_tag');
+				}
+				else {
+					die "CDS feature at $start has no locus_tag!\n";
+				}
+				my $product;
+				if ( $feature->has_tag('product') ) {
+					( $product ) = $feature->get_tag_values('product');
+				}
+				else {
+					$product = "Unknown product"
+				}
+
+				my $protein = $feature->spliced_seq->translate;
+				my $aa_seq = $protein->seq;
+				$aa_seq =~ s/\*$//;
+				print ">$locus_tag $product\n";
+				print sblock($aa_seq);
+
+				$count_CDS++;
 			}
 		}			
 	}
