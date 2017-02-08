@@ -52,17 +52,7 @@ while ( my $seq = $seqio_in->next_seq() ) {
 				}
 			}
 			else {
-				if ( $feature->has_tag('partial') ) {
-					if ( $feature->has_tag($codon_start) ) {	
-						$ok = 1
-					}
-					else {				
-						print STDERR "Ignoring partial feature at $start with no codon_start attribute!";
-					}	
-				}
-				else {
-					$ok = 1;
-				}
+				$ok = 1;
 			}
 
 			if ( $ok ) {
