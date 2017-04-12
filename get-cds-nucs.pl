@@ -3,7 +3,7 @@
 # Extracts the nucleotide sequence of each CDS from an annotated sequence file. 
 # Outputs sequences in FASTA format to STDOUT.
 
-#   get-cds.pl [-f <format>] [-pseudo] <file>
+#   get-cds-nucs.pl [-f <format>] [-pseudo] <file>
 
 #     -f          Input file format (guessed if not specified).
 #     -pseudo     Include CDS features flagged as pseudogenes.
@@ -67,7 +67,18 @@ while ( my $seq = $seqio_in->next_seq() ) {
 				}
 
 				print ">$locus_tag $product\n";
-				print sblock($feature->spliced_seq->seq);
+
+				my $spliced_seq = $feature->spliced_seq->seq;
+				if ( $feature->has_tag('codon_start') ) {
+					( my $codon_start ) = $feature->get_tag_values('codon_start');
+
+					if ( $codon_start > 1 ) {
+						$spliced_seq = substr $spliced_seq, ($codon_start - 1);
+						print STDERR "Trimming CDS '$locus_tag' to base $codon_start!\n";
+					}
+				}
+
+				print sblock($spliced_seq);
 
 				$count_CDS++;
 			}
