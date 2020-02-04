@@ -8,7 +8,7 @@
 #     -c	Output file format (genbank/embl/gff).
 #     -f	Input file format (genbank/embl/gff, guessed if not specified).
 
-# Warning: Output files are deleted if they already exist!
+# Warning: the script overwrites output files if they already exist!
 
 # Script written by Alejandro Llanes (thyngum@gmail.com)
 
