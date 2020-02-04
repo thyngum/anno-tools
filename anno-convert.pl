@@ -8,6 +8,8 @@
 #     -c	Output file format (genbank/embl/gff).
 #     -f	Input file format (genbank/embl/gff, guessed if not specified).
 
+# Warning: Output files are deleted if they already exist!
+
 # Script written by Alejandro Llanes (thyngum@gmail.com)
 
 use Bio::SeqIO;
@@ -62,7 +64,7 @@ foreach my $item ( @ARGV ) {
 		if ( $output_format eq 'gff' ) {
 
 			my $gffout = new Bio::Tools::GFF(-file => ">$output",
-				 			                 -gff_version => 2);
+				 			                 -gff_version => 3);
 
 			while ( $seq = $seqio_in->next_seq ) {
 				for my $feature ( $seq->top_SeqFeatures ) {
