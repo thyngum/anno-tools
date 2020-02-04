@@ -1,11 +1,12 @@
 #!/usr/bin/perl
 
-# Extracts the sequences from one or more annotated files and save them to corresponding
-# FASTA files (with *.fasta extension).
+# Extracts the sequence from one or more annotated files and save it to corresponding
+# FASTA files. Output files are named after the basename of input files, with *.fasta 
+# extension.
 
 #   anno-to-fasta.pl [-f <format>] <file(s)>
 
-#     -f     Input file format (guessed if not specified).
+#     -f     Input file format (genbank/embl, guessed if not specified).
 
 # Script written by Alejandro Llanes (thyngum@gmail.com)
 
@@ -20,9 +21,9 @@ die "Usage: anno-to-fasta.pl [-f <format>] <file(s)>\n" unless ( @ARGV );
 
 foreach my $item ( @ARGV ) {
 	next if ($item =~ m/^\./);
-	
-	if ( -f $item ) {		
-		my ($name, $path, $suffix) = fileparse($item, qr/\.[^.]*/);		    
+
+	if ( -f $item ) {
+		my ($name, $path, $suffix) = fileparse($item, qr/\.[^.]*/);
 		my $output = $path . "/" . $name . ".fasta";
 
 		if ( $format ) {
@@ -34,25 +35,24 @@ foreach my $item ( @ARGV ) {
 		}
 
 		if ( -e $output ) {
-			print "File \'$name.fasta\' already exist! Overwrite it? (y/N) ";
-			my $answer = <STDIN>;
-			chomp $answer;
-			
-			next if ( $answer ne 'y' and $answer ne 'Y' );
+			unlink $output;
 		}
+
+		print STDERR "$name$suffix";
 
 		my $seq_out = new Bio::SeqIO(-format => 'fasta',
 		                             -file   => ">$output");
-		
+
 		while ( my $seq = $seqio_in->next_seq() ) {
-			$seq->id($name) if ( $seq->id eq "unknown_id" ); # Address the issue that IDs are missing in some EMBL files
-			$seq_out->write_seq($seq);	
+			$seq->id($name) if ( $seq->id eq "unknown_id" ); # IDs may be missing
+			$seq_out->write_seq($seq);
 		}
 
-		print STDERR "$name.fasta .. done\n";
-		
+		print STDERR " -> $name.fasta\n";
+
 	} 
 	else {
 		print STDERR "File \'$item\' not found!\n";
-	}          
+	}
 }
+
