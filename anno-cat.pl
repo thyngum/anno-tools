@@ -1,12 +1,13 @@
 #!/usr/bin/perl
 
 # Concatenates a set of annotated files into a single file. Joins the input sequences
-# into a single sequence and appends the annotations with corrected coordinates.
-# Output is saved to a "anno.cat" file or to the file specified with the -out option.
+# and appends the annotations with corrected coordinates. Output is saved to an "anno.cat"
+# file or to the file specified with the -out option.
 
 # 	anno-cat.pl -f <format> [-out <filename>] <file(s)>
 
-#   	-f <format>		Any of the formats supported by BioPerl (required).
+#   	-f <format>	Output format (required). Should accept most of the annotated formats,
+#	               	but only tested with Genbank/EMBL.
 
 use Bio::SeqIO;
 use Bio::SeqUtils;
