@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# Extracts the nucleotide sequence of each CDS from an annotated sequence file. 
+# Extracts the nucleotide sequence of each CDS from an annotated sequence file.
 # Outputs sequences in FASTA format to STDOUT.
 
 #   get-cds-nucs.pl [-f <format>] [-pseudo] <file>
