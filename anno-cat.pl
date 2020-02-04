@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
-# Concatenates a set of annotated files into a single file. Joins the input sequences
-# and appends the annotations with corrected coordinates. Output is saved to an "anno.cat"
+# Concatenates a set of annotated files into a single file with the same format. Joins the input
+# sequences and appends the annotations with corrected coordinates. Output is saved to an "anno.cat"
 # file or to the file specified with the -out option.
 
 # 	anno-cat.pl -f <format> [-out <filename>] <file(s)>
