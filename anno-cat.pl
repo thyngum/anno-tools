@@ -43,7 +43,7 @@ foreach my $item ( @ARGV ) {
 die "Enter two or more input files!\n" if ( @files <= 1 );
 
 if ( ! $output ) {
-	$output = $path . "/anno.cat";
+	$output = "anno.cat";
 }
 else {
 	($name, $path, $suffix) = fileparse($output, qr/\.[^.]*/);
@@ -56,7 +56,8 @@ if ( -e $output ) {
 
 my @seqs = ();
 foreach my $file ( @files ) {
-	print STDERR  "$file .. added\n";
+	($name, $path, $suffix) = fileparse($file, qr/\.[^.]*/);
+	print STDERR  "$name$suffix .. added\n";
 
    	$seqio = new Bio::SeqIO(-format => $format,
 	                        -file   => $file);
